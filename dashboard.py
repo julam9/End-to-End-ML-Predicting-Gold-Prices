@@ -17,7 +17,7 @@ load_dotenv()
 api_key = os.getenv("ALPVAN_API_KEY") 
 
 # getting API key (for streamlit deployment)
-API_KEY = st.secrets["ALPHA_VANTAGE_API_KEY"]
+API_KEY = st.secrets["ALPVAN_API_KEY"]
 
 st.set_page_config(page_title="Gold Price Predictor", layout="wide")
 st.title("📈 Gold Price Forecasting Dashboard")
