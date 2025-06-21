@@ -10,11 +10,14 @@ from src.model_construction import load_model, multi_step_predict
 from src.model_evaluation import evaluate_model
 import datetime
 
-# getting API key
+# getting API key (for testing)
 import os
 from dotenv import load_dotenv
 load_dotenv()
-api_key = os.getenv("ALPVAN_API_KEY")
+api_key = os.getenv("ALPVAN_API_KEY") 
+
+# getting API key (for streamlit deployment)
+API_KEY = st.secrets["ALPHA_VANTAGE_API_KEY"]
 
 st.set_page_config(page_title="Gold Price Predictor", layout="wide")
 st.title("📈 Gold Price Forecasting Dashboard")
