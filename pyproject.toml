@@ -1,5 +1,5 @@
 [project]
-name = "predict-gold-prices"
+name = "Predict-Gold-Prices"
 version = "0.1.0"
 description = "Predict gold prices using machine learning"
 authors = [
