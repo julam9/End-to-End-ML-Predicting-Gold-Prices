@@ -56,41 +56,44 @@ def save_model(model, directory='model'):
 #         model = pickle.load(f)
 #     return model
 
-def load_model(folder_path='../model'):
+def load_model(folder_path=None):
     """
-    Load a trained model from the models folder (one of two available models).
+    Load a trained model from the models folder with flexible path resolution.
     
     Args:
-        folder_path (str): Relative path to the models folder. Defaults to '../models'.
+        folder_path (str|None): Relative path to models folder. If None, tries common locations.
         
     Returns:
         model: The loaded model object.
         
     Raises:
-        FileNotFoundError: If no model files are found in the folder.
-        ValueError: If folder path is invalid.
+        FileNotFoundError: If no model files are found.
     """
-    try:
-        # Resolve the absolute path to handle relative paths correctly
-        models_dir = Path(folder_path).resolve()
-        
-        # Get all .pkl files in the folder
-        model_files = list(models_dir.glob('*.pkl'))
-        
-        if not model_files:
-            raise FileNotFoundError(f"No .pkl model files found in {models_dir}")
-            
-        # Sort files by modification time (newest first) and take the first one
-        model_files.sort(key=os.path.getmtime, reverse=True)
-        selected_model = model_files[0]
-        
-        print(f"Loading model: {selected_model.name}")
-        with open(selected_model, 'rb') as f:
-            return pickle.load(f)
-            
-    except Exception as e:
-        raise ValueError(f"Error loading model: {str(e)}")
-
+    # Define possible model locations relative to the script
+    possible_paths = [
+        Path(__file__).parent.parent / 'models',  # ../models
+        Path(__file__).parent.parent.parent / 'models',  # ../../models
+        Path('models'),  # ./models (current dir)
+    ]
+    
+    if folder_path:
+        possible_paths.insert(0, Path(folder_path).resolve())
+    
+    # Try each possible location
+    for model_dir in possible_paths:
+        model_files = list(model_dir.glob('*.pkl'))
+        if model_files:
+            # Sort by modification time (newest first)
+            model_files.sort(key=os.path.getmtime, reverse=True)
+            selected_model = model_files[0]
+            print(f"Loading model from: {selected_model}")
+            with open(selected_model, 'rb') as f:
+                return pickle.load(f)
+    
+    raise FileNotFoundError(
+        f"No .pkl files found in any of these locations:\n" +
+        "\n".join(str(p) for p in possible_paths)
+    )
 def multi_step_predict(model, last_known_data, days, feature_creator, selected_columns):
     """
     Predict future values using a trained model for multiple steps.
