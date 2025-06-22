@@ -7,7 +7,6 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-
 def train_model(X_train, y_train):
     """
     Train an XGBoost regressor.
@@ -57,7 +56,7 @@ def save_model(model, directory='model'):
 #         model = pickle.load(f)
 #     return model
 
-def load_model(folder_path='../models'):
+def load_model(folder_path='../model'):
     """
     Load a trained model from the models folder (one of two available models).
     
