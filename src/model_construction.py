@@ -5,6 +5,8 @@ import pandas as pd
 import joblib 
 import os 
 from datetime import datetime
+from pathlib import Path
+
 
 def train_model(X_train, y_train):
     """
@@ -41,19 +43,54 @@ def save_model(model, directory='model'):
     joblib.dump(model, filepath)
     print(f"✅ Model saved to {filepath}")
     
-def load_model(path='xgboost_predictor.pkl'):
-    """
-    Load a trained model from a file.
+# def load_model(path='xgboost_predictor.pkl'):
+#     """
+#     Load a trained model from a file.
 
+#     Args:
+#         path (str): File path to load the model.
+
+#     Returns:
+#         model: Loaded model.
+#     """
+#     with open(path, 'rb') as f:
+#         model = pickle.load(f)
+#     return model
+
+def load_model(folder_path='../models'):
+    """
+    Load a trained model from the models folder (one of two available models).
+    
     Args:
-        path (str): File path to load the model.
-
+        folder_path (str): Relative path to the models folder. Defaults to '../models'.
+        
     Returns:
-        model: Loaded model.
+        model: The loaded model object.
+        
+    Raises:
+        FileNotFoundError: If no model files are found in the folder.
+        ValueError: If folder path is invalid.
     """
-    with open(path, 'rb') as f:
-        model = pickle.load(f)
-    return model
+    try:
+        # Resolve the absolute path to handle relative paths correctly
+        models_dir = Path(folder_path).resolve()
+        
+        # Get all .pkl files in the folder
+        model_files = list(models_dir.glob('*.pkl'))
+        
+        if not model_files:
+            raise FileNotFoundError(f"No .pkl model files found in {models_dir}")
+            
+        # Sort files by modification time (newest first) and take the first one
+        model_files.sort(key=os.path.getmtime, reverse=True)
+        selected_model = model_files[0]
+        
+        print(f"Loading model: {selected_model.name}")
+        with open(selected_model, 'rb') as f:
+            return pickle.load(f)
+            
+    except Exception as e:
+        raise ValueError(f"Error loading model: {str(e)}")
 
 def multi_step_predict(model, last_known_data, days, feature_creator, selected_columns):
     """
