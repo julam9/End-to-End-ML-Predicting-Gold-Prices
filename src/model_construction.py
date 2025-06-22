@@ -71,9 +71,9 @@ def load_model(folder_path=None):
     """
     # Define possible model locations relative to the script
     possible_paths = [
-        Path(__file__).parent.parent / 'models',  # ../models
-        Path(__file__).parent.parent.parent / 'models',  # ../../models
-        Path('models'),  # ./models (current dir)
+        Path(__file__).parent.parent / 'model',  # ../models
+        Path(__file__).parent.parent.parent / 'model',  # ../../models
+        Path('model'),  # ./models (current dir)
     ]
     
     if folder_path:
