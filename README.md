@@ -25,7 +25,10 @@ This project is my first end to end machine learning project. Through this proje
 - poetry.lock : Contains store project metadata, build system information, and dependency specifications 
 - pyproject.toml :  Contains package version needed to be installed 
 - pipeline_validation.py : Script to check if the entire end to end process is working
-- train.py : Script to train and save model  
+- train.py : Script to train and save model
+- requirements.txt : Contains package version needed (only for streamlit deployment)
+- dashboard.py : Script to deploy the dashboard about price visualization and forecasting 
+-   
 
 ## 🚀 Features
 

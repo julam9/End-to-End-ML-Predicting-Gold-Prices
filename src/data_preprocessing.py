@@ -13,11 +13,11 @@ def add_variables(df):
         pd.DataFrame : Dataframe with new features added.
     """
     
-    df["return"] = df["close"].pct_change()
+    df["return"] = df["Close"].pct_change()
     df["rolling_mean"] = df["return"].rolling(window=5).mean()
     df["rolling_std"] = df["return"].rolling(window=5).std()
-    df["high_low_spread"] = df["high"] - df["low"]
-    df["open_close_spread"] = df["open"] - df["close"]
+    df["high_low_spread"] = df["High"] - df["Low"]
+    df["open_close_spread"] = df["Open"] - df["Close"]
     # df = df.dropna()
     return df
 
@@ -51,7 +51,7 @@ def prepare_data_for_training(df, k=3, test_size=0.2):
     """
     # Feature columns (must exist after add_variables)
     feature_cols = ["return", "rolling_mean", "rolling_std", "high_low_spread", "open_close_spread"]
-    target_col = "close"
+    target_col = "Close"
 
     # Drop rows with missing values just in case
     df = df.dropna(subset=feature_cols + [target_col])

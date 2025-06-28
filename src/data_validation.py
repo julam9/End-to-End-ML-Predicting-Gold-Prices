@@ -3,11 +3,11 @@ from pandera import Column, DataFrameSchema, Check
 
 # Define schema for gold price data
 gold_schema = DataFrameSchema({
-    "open": Column(pa.Float, Check.ge(0)),
-    "high": Column(pa.Float, Check.ge(0)),
-    "low": Column(pa.Float, Check.ge(0)),
-    "close": Column(pa.Float, nullable=True),
-    "volume": Column(pa.Int, Check.ge(0)),
+    "Open": Column(pa.Float, Check.ge(0)),
+    "High": Column(pa.Float, Check.ge(0)),
+    "Low": Column(pa.Float, Check.ge(0)),
+    "Close": Column(pa.Float, nullable=True),
+    "Volume": Column(pa.Int, Check.ge(0)),
 })
 
 def validate_data(df):

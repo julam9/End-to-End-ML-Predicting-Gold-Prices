@@ -1,47 +1,35 @@
-import pandas as pd
-from alpha_vantage.timeseries import TimeSeries
 from pathlib import Path
+import yfinance as yf 
 import pandas as pd
-from dotenv import load_dotenv
-import os
-from alpha_vantage.timeseries import TimeSeries
 
-# Construct path to .env in the parent directory
-env_path = Path('..') / '.env'
-
-# Load the .env file
-load_dotenv(dotenv_path=env_path)
-
-def load_gold_data(start_date=None, end_date=None, api_key=None):
+def load_gold_data(start_date, end_date, interval, file_name):
     """
-    Load gold price data from Alpha Vantage API between start_date and end_date.
+    Load gold price data from Yahoo Finance API between start_date and end_date.
 
     Args:
         start_date (str): Start date in 'YYYY-MM-DD' format.
         end_date (str): End date in 'YYYY-MM-DD' format.
-        api_key (str, optional): Your Alpha Vantage API key. If None, loads from .env.
+        period (str): Period of data to be collected, e.g., '1d', '1wk', '1mo'.
 
     Returns:
-        pd.DataFrames: Two DataFrames consist of gold price data. One for visualization, one for training.
+        pd.DataFrames: Two DataFrames consist of gold price data. One for visualization, one for training.  
     """
-    if api_key is None:
-        api_key = os.getenv("ALPVAN_API_KEY")
-
-    ts = TimeSeries(key=api_key, output_format='pandas')
-    data, meta_data = ts.get_daily(symbol='GLD', outputsize='full') 
-    # set datetime as index
-    data.index = pd.to_datetime(data.index)
-    # tidying up the column names
-    data.columns = data.columns.str.replace(r'^\d+\.\s*', '', regex=True)
-    # sort the index so we can slice it
-    data = data.sort_index()
-    # condition for start and end date
-    if start_date:
-        data = data[data.index >= pd.to_datetime(start_date)]
-    if end_date:
-        data = data[data.index <= pd.to_datetime(end_date)]
-    # filter the data to use
-    df = data[start_date:end_date]
-    # change volume into integer data type
-    df['volume'] = df['volume'].round().astype(int)
-    return df
+    try:
+        df = yf.download("GC=F", start=start_date, end=end_date, interval=interval)
+        # clean the column names
+        df.columns = ['_'.join(col).strip("()").split(",")[0].split('_')[0] for col in df.columns]
+        # cast the volume data type to integer 
+        df['Volume'] = df['Volume'].round().astype(int)
+        # save the dataframe as a CSV file 
+        df.to_csv(f'data/{file_name}.csv') 
+        return df
+    
+    except Exception as e:
+        print(f"API Error : {e} - Attempting local callback" )
+        
+        try:
+            pd.read_csv(f'data/{file_name}.csv', index_col=0, parse_dates=True)
+        except Exception as e:
+            print(f"File not found: {e}. Please ensure the file exists in the data directory.")
+            return None
+            

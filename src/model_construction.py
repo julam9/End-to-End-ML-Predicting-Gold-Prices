@@ -22,7 +22,7 @@ def train_model(X_train, y_train):
     model.fit(X_train, y_train)
     return model
 
-def save_model(model, directory='model'):
+def save_model(model, directory):
     """
     Save the trained model to a timestamped .pkl file inside the 'models' directory.
 
@@ -42,58 +42,47 @@ def save_model(model, directory='model'):
     joblib.dump(model, filepath)
     print(f"✅ Model saved to {filepath}")
     
-# def load_model(path='xgboost_predictor.pkl'):
-#     """
-#     Load a trained model from a file.
-
-#     Args:
-#         path (str): File path to load the model.
-
-#     Returns:
-#         model: Loaded model.
-#     """
-#     with open(path, 'rb') as f:
-#         model = pickle.load(f)
-#     return model
-
-def load_model(folder_path=None):
+def load_latest_model(model_path):
     """
-    Load a trained model from the models folder with flexible path resolution.
+    Find the latest .pkl model file in the specified directory.
+    Sorts by filename assuming datetime format like model_YYYYMMDD_HHMMSS.pkl
     
     Args:
-        folder_path (str|None): Relative path to models folder. If None, tries common locations.
+        model_path (str): Path to the directory containing model files
         
     Returns:
-        model: The loaded model object.
+        str: Full path to the latest model file
         
     Raises:
-        FileNotFoundError: If no model files are found.
+        FileNotFoundError: If the directory doesn't exist
+        ValueError: If no .pkl files are found in the directory
     """
-    # Define possible model locations relative to the script
-    possible_paths = [
-        Path(__file__).parent.parent / 'model',  # ../models
-        Path(__file__).parent.parent.parent / 'model',  # ../../models
-        Path('model'),  # ./models (current dir)
-    ]
     
-    if folder_path:
-        possible_paths.insert(0, Path(folder_path).resolve())
+    # Convert to Path object for easier handling
+    model_dir = Path(model_path)
     
-    # Try each possible location
-    for model_dir in possible_paths:
-        model_files = list(model_dir.glob('*.pkl'))
-        if model_files:
-            # Sort by modification time (newest first)
-            model_files.sort(key=os.path.getmtime, reverse=True)
-            selected_model = model_files[0]
-            print(f"Loading model from: {selected_model}")
-            with open(selected_model, 'rb') as f:
-                return pickle.load(f)
+    # Check if directory exists
+    if not model_dir.exists():
+        raise FileNotFoundError(f"Directory '{model_path}' does not exist")
     
-    raise FileNotFoundError(
-        f"No .pkl files found in any of these locations:\n" +
-        "\n".join(str(p) for p in possible_paths)
-    )
+    if not model_dir.is_dir():
+        raise ValueError(f"'{model_path}' is not a directory")
+    
+    # Find all .pkl files in the directory
+    pkl_files = list(model_dir.glob("*.pkl"))
+    
+    # Check if any .pkl files exist
+    if not pkl_files:
+        raise ValueError(f"No .pkl files found in directory '{model_path}'") 
+    
+    # Sort by filename (model_YYYYMMDD_HHMMSS format is lexicographically sortable)
+    latest_model = max(pkl_files, key=lambda x: x.name)
+    
+    with open(f'{latest_model}', 'rb') as f:
+        latest_model = pickle.load(f)
+    
+    return f
+
 def multi_step_predict(model, last_known_data, days, feature_creator, selected_columns):
     """
     Predict future values using a trained model for multiple steps.
